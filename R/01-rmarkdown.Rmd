@@ -13,8 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Here is the link to the data used in this analysis:
 
-- [**.gdb data**](https://www.canada.ca/en/environment-climate-change/services/national-wildlife-areas/protected-conserved-areas-database.html): multipolygon
-- **Community area data**: polygons
+- [**Canadian Protected and Conserved Areas Database**](https://www.canada.ca/en/environment-climate-change/services/national-wildlife-areas/protected-conserved-areas-database.html): SpatialPolygonsDataFrame
+- **Protected Lands and Waters in B.C.**: multipolygons
 
 ### Rationale for Data
 Why I used this data:
@@ -22,7 +22,6 @@ Why I used this data:
 1. *Different geometries*
 2. *Relevant and interesting*
 
-![](areas_without_libraries.png)
 
 # Load packages
 ```{r, message=FALSE, warning=FALSE}

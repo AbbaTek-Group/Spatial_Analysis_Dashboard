@@ -37,7 +37,7 @@ library(envreportutils)
 ```{r results='hide'}
 BC <- readRDS('simplefeatureclass_June2019')
 BC1 <- readRDS('simplefeatureclass_Dec2019')
-BC2 <- readRDS('simplefeatureclass_Dec2019')
+BC2 <- readRDS('simplefeatureclass_Dec2018')
 
 areas <- st_transform(areas, 32616)
 libraries <- st_transform(libraries, 32616)

@@ -14,12 +14,12 @@ knitr::opts_chunk$set(echo = TRUE)
 Here is the link to the data used in this analysis:
 
 - [**Canadian Protected and Conserved Areas Database**](https://www.canada.ca/en/environment-climate-change/services/national-wildlife-areas/protected-conserved-areas-database.html): SpatialPolygonsDataFrame
-- **Protected Lands and Waters in B.C.**: multipolygons
+- [**Protected Lands and Waters in B.C.**](http://www.env.gov.bc.ca/soe/indicators/land/protected-lands-and-waters.html): multipolygons
 
 ### Rationale for Data
 Why I used this data:
 
-1. *Different geometries*
+1. *Updated*
 2. *Relevant and interesting*
 
 
@@ -28,12 +28,17 @@ Why I used this data:
 library(sf)
 library(ggplot2)
 library(dplyr)
+library(bcmaps)
+library(rgdal)
+library(envreportutils)
 ```
 
 # Read and project data
 ```{r results='hide'}
-areas <- st_read("https://data.cityofchicago.org/resource/igwz-8jzy.geojson")
-libraries <- st_read("https://data.cityofchicago.org/resource/psqp-6rmg.geojson")
+BC <- readRDS('simplefeatureclass_June2019')
+BC1 <- readRDS('simplefeatureclass_Dec2019')
+BC2 <- readRDS('simplefeatureclass_Dec2019')
+
 areas <- st_transform(areas, 32616)
 libraries <- st_transform(libraries, 32616)
 ```

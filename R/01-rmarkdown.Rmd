@@ -31,6 +31,8 @@ library(dplyr)
 library(bcmaps)
 library(rgdal)
 library(envreportutils)
+library(tmap)
+library(leaflet)
 ```
 
 # Read and project data

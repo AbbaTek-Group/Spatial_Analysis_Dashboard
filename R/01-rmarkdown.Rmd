@@ -36,8 +36,8 @@ library(envreportutils)
 # Read and project data
 ```{r results='hide'}
 BC_June2019 <- readRDS('CPCAD_BCJune2019')
-BC_June <- readRDS('simplefeatureclass_Dec2019')
-BC2 <- readRDS('simplefeatureclass_Dec2018')
+BC_Dec2019 <- readRDS('simplefeatureclass_Dec2019')
+BC_June2018 <- readRDS('simplefeatureclass_Dec2018')
 
 areas <- st_transform(areas, 32616)
 libraries <- st_transform(libraries, 32616)

@@ -6,6 +6,23 @@ This repository contains R code that uses spatial data to gegerate an interactiv
 ## Data
 The preprocessed data from above was used for this project and can be assessed from this [Open Science Framework repository](https://osf.io/49swq/)
 
+## Tools
+platform       x86_64-w64-mingw32          
+arch           x86_64                      
+os             mingw32                     
+system         x86_64, mingw32             
+status                                     
+major          3                           
+minor          6.2                         
+year           2019                        
+month          12                          
+day            12                          
+svn rev        77560                       
+language       R                           
+version.string R version 3.6.2 (2019-12-12)
+nickname       Dark and Stormy Night 
+
+
 Essential packages used include;
 
 * sf

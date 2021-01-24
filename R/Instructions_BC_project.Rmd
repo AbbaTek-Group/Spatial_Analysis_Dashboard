@@ -1,0 +1,159 @@
+--
+title: "Spatial Analysis and Visualization of BC Protected and Conserved Areas using R and Shiny"
+author: "Ivo Arrey"
+date: "21/01/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Used 
+
+Here is the link to the data used in this analysis:
+
+- [**Canadian Protected and Conserved Areas Database**](https://www.canada.ca/en/environment-climate-change/services/national-wildlife-areas/protected-conserved-areas-database.html): SpatialPolygonsDataFrame
+- [**Protected Lands and Waters in B.C.**](http://www.env.gov.bc.ca/soe/indicators/land/protected-lands-and-waters.html): multipolygons
+
+### Rationale for Data
+Why I used this data:
+
+1. *Updated*
+2. *Relevant and interesting*
+
+
+# Load packages
+```{r, message=FALSE, warning=FALSE}
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(bcmaps)
+library(rgdal)
+library(tmap)
+library(leaflet)
+library(mapview)
+```
+
+The Canadian Protected and Conserved Areas Database (CPCAD) contains the most up to date spatial and attribute data on marine and terrestrial protected areas and other effective area-based conservation measures (OECM) in Canada. It is compiled and managed by Environment and Climate Change Canada (ECCC), in collaboration with federal, provincial, and territorial jurisdictions.
+
+# Read in the Canadian Protected and Conserved Areas Database (CPCAD) filtered for the province of B.C.
+
+```{r results='hide'}
+
+BC_June2019 <- readRDS('D:/BC_Spatial/Code/CPCAD_BCJune2019')
+BC_Dec2019 <- readRDS('D:/BC_Spatial/Code/CPCAD_BCDec2019')
+BC_June2018 <- readRDS('D:/BC_Spatial/Code/CPCAD_BCDec2018')
+
+```
+
+# Thematic view of B.C territorial boundary map 
+```{r }
+ bc <- bc_bound()
+plot(st_geometry(bc))
+
+```
+
+# Faceted map showing spatial and temporal change in terrestrial and marine Biomes  
+```{r}
+ma0 <- tm_shape(BC_June2019) + tm_borders() + tm_fill(col = 'BIOME', title = expression("B.C. (June 2019)"))+ tm_style('classic')
+ma1 <- tm_shape(BC_Dec2019) + tm_borders() + tm_fill(col = 'BIOME', title = expression("B.C (December 2019)"))+ tm_style('classic')
+ma2 <- tm_shape(BC_June2018)+ tm_borders() + tm_fill(col = 'BIOME', title = expression("B.C. (June 2018)"))+ tm_style('classic')
+tmap_arrange(ma0,ma1,ma2)
+
+```
+
+
+# Analyse the changes in percentage of terrestrial and marine protected and conserved areas over time
+
+## percentage change of terrestrial protected and conserved areas in B.C from June 2018 to December 2019
+
+```{r}
+BiomeT_June2018 <- BC_June2018 %>% filter(BIOME == 'T')%>% group_by(TYPE_E)%>% summarise(area_des_ha = as.numeric(sum(O_AREA)) * 1e-4) %>%
+    mutate(percent_des = (area_des_ha * 1e4) / as.numeric(sum(BC_Dec2019$O_AREA)) * 100) %>%
+    mutate_if(is.numeric, round, digits = 2)%>% mutate(Date = as.Date(paste0("2018-", 06, "-01"), "%Y-%m-%d"))
+  
+  BiomeT_June2019 <- BC_June2019 %>% filter(BIOME == 'T')%>% group_by(TYPE_E)%>% summarise(area_des_ha = as.numeric(sum(O_AREA)) * 1e-4) %>%
+    mutate(percent_des = (area_des_ha * 1e4) / as.numeric(sum(BC_Dec2019$O_AREA)) * 100) %>% mutate_if(is.numeric, round, digits = 2)%>%
+     mutate(Date = as.Date(paste0("2019-", 06, "-01"), "%Y-%m-%d"))
+  
+  BiomeT_Dec2019 <- BC_Dec2019 %>% filter(BIOME == 'T')%>% group_by(TYPE_E)%>% summarise(area_des_ha = as.numeric(sum(O_AREA)) * 1e-4) %>%
+    mutate(percent_des = (area_des_ha * 1e4) / as.numeric(sum(BC_Dec2019$O_AREA)) * 100) %>% mutate_if(is.numeric, round, digits = 2)%>% 
+    mutate(Date = as.Date(paste0("2019-", 12, "-01"), "%Y-%m-%d"))
+  
+#  Transform each spatial object to B.C projection crs
+  
+  BiomeT_June2018 <- transform_bc_albers(BiomeT_June2018)
+  BiomeT_June2019 <- transform_bc_albers(BiomeT_June2019)
+  BiomeT_Dec2019 <- transform_bc_albers(BiomeT_Dec2019)
+  
+# combine spatial objects for ploting
+  BiomeT_combined <- rbind(BiomeT_June2018, BiomeT_June2019, BiomeT_Dec2019)
+  
+  # plot spatial objects
+  
+  tm_shape(BiomeT_combined) +
+    tm_polygons()+
+    tm_symbols(col = "black", border.col = "white", size = "area_des_ha") +
+    tm_facets(by = "Date", nrow = 2, free.coords = FALSE)
+  
+
+```
+
+
+
+# The map above can be veiwing our map interactively using mapview and leaflet from below
+
+```{r}
+
+ map_BC <- tm_shape(BiomeT_combined) +
+    tm_polygons()+
+    tm_symbols(col = "black", border.col = "white", size = "area_des_ha") +
+    tm_facets(by = "Date", nrow = 2, free.coords = FALSE)
+
+tmap_mode("view")
+
+map_BC
+
+```
+```{r}
+BiomeT_combined %>%
+   filter(TYPE_E == "Protected Area") %>% st_collection_extract("POLYGON") %>% 
+  mapview(color = "red", lwd = 3, layer.name = "TYPE_E")
+  
+```
+
+
+
+```{r}
+pal = colorNumeric("RdYlBu", domain = BiomeT_combined$percent_des)
+
+leaflet(data = BiomeT_combined) %>% 
+  addPolygons(data = BiomeT_combined, fill = TRUE) %>%
+  addLegend(pal = pal, values = ~percent_des) %>%
+  setView(lng = -0.1, 51.5, zoom = 12) %>% 
+  addMiniMap()
+  
+```
+
+# A useful shortcut to Mapping Applications with Shiny
+```{r}
+library(shiny)    # for shiny apps
+library(leaflet)  # renderLeaflet function
+library(bcmaps)
+
+ui = fluidPage(
+  sliderInput(inputId = "area_des_ha", "Area designated", 0, 1045.21, value = 80),
+      leafletOutput(outputId = "map")
+  )
+server = function(input, output) {
+  output$map = renderLeaflet({
+       BiomeT_combined %>% 
+      tm_shape() +
+    tm_polygons()+
+    tm_symbols(col = "black", border.col = "white", size = input$area_des_ha) +
+    tm_facets(by = "Date", nrow = 2, free.coords = FALSE) })
+}
+shinyApp(ui, server)
+```
+

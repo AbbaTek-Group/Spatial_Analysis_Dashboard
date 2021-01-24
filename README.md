@@ -17,3 +17,4 @@ Essential packages used include;
 * leaflet
 * mapview
 * tidyverse
+* leaflet

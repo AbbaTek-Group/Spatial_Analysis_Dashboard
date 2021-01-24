@@ -7,6 +7,7 @@ This repository contains R code that uses spatial data to gegerate an interactiv
 The preprocessed data from above was used for this project and can be assessed from this [Open Science Framework repository](https://osf.io/49swq/)
 
 ## Tools
+This pre-analysis was run on a windows 10 OS
 platform       x86_64-w64-mingw32          
 arch           x86_64                      
 os             mingw32                     

@@ -138,22 +138,59 @@ leaflet(data = BiomeT_combined) %>%
 
 # A useful shortcut to Mapping Applications with Shiny
 ```{r}
-library(shiny)    # for shiny apps
-library(leaflet)  # renderLeaflet function
-library(bcmaps)
+library(shiny)
+library(leaflet)
+library(tidyverse)
+library(sf)
+library(tmap)
 
-ui = fluidPage(
-  sliderInput(inputId = "area_des_ha", "Area designated", 0, 1045.21, value = 80),
-      leafletOutput(outputId = "map")
-  )
-server = function(input, output) {
-  output$map = renderLeaflet({
-       BiomeT_combined %>% 
-      tm_shape() +
-    tm_polygons()+
-    tm_symbols(col = "black", border.col = "white", size = input$area_des_ha) +
-    tm_facets(by = "Date", nrow = 2, free.coords = FALSE) })
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+
+    # Application title
+    titlePanel("B.C Protected and Conserved Terrestrial Areas"),
+
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("area_des_ha",
+                        "Designated Areas:",
+                        min = 0,
+                        max = 1045.21,
+                        value = 80)
+        ),
+
+        # Show a plot of the generated distribution
+        mainPanel(
+           leafletOutput(outputId = "map")
+        )
+    )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+
+    output$map <- renderLeaflet({
+        
+        # generate areas of designated terrestrial land from ui.R
+        
+        BC_Dec2019 <- readRDS('D:/BC_Spatial/Code/CPCAD_BCDec2019')
+        BiomeT_Dec2019 <- BC_Dec2019 %>% filter(BIOME == 'T')%>% group_by(TYPE_E)%>% summarise(area_des_ha = as.numeric(sum(O_AREA)) * 1e-4) %>%
+            mutate(percent_des = (input$area_des_ha * 1e4) / as.numeric(sum(BC_Dec2019$O_AREA)) * 100) %>% mutate_if(is.numeric, round, digits = 2) 
+            #mutate(Date = as.Date(paste0("2019-", 12, "-01"), "%Y-%m-%d"))
+        
+        # draw the interactive map with the desired designated area size
+        
+            tm_shape(BiomeT_Dec2019) +
+            tm_polygons()+
+            tm_symbols(col = "black", border.col = "white", size = "percent_des")
+            tm_fill(col = "TYPE_E") 
+            })
+
 }
-shinyApp(ui, server)
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+
 ```
 

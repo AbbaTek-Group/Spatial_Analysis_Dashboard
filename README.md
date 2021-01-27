@@ -32,6 +32,7 @@ Essential packages used include;
 * bcmaps
 * rgdal
 * tmap
+* plotly
 * leaflet
 * mapview
 * tidyverse
